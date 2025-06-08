@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,68 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Editor de Overlays</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
-    .tabs {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-    }
-
-    .tab-btn {
-      padding: 10px 20px;
-      cursor: pointer;
-      background-color: #eee;
-      border: none;
-      margin: 0 5px;
-    }
-
-    .tab-content {
-      display: none;
-      padding: 20px;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .overlay-container {
-      position: relative;
-      max-width: 100%;
-      overflow: hidden;
-    }
-
-    .overlay-img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    .overlay-text {
-      position: absolute;
-      left: 0;
-      color: white;
-      white-space: nowrap;
-      transition: transform 0.6s ease;
-    }
-
-    .hidden {
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-
-    .visible {
-      transform: translateX(0%);
-      opacity: 1;
-    }
-
-    input[type="range"] {
-      width: 100%;
-    }
+    body { font-family: sans-serif; margin: 0; padding: 0; }
+    .tabs { display: flex; justify-content: center; margin-top: 10px; }
+    .tab-btn { padding: 10px 20px; cursor: pointer; background-color: #eee; border: none; margin: 0 5px; }
+    .tab-content { display: none; padding: 20px; }
+    .tab-content.active { display: block; }
+    .overlay-container { position: relative; max-width: 100%; overflow: hidden; }
+    .overlay-img { width: 100%; height: auto; display: block; }
+    .overlay-text { position: absolute; left: 0; color: white; white-space: nowrap; transition: transform 0.6s ease; }
+    .hidden { transform: translateX(-100%); opacity: 0; }
+    .visible { transform: translateX(0%); opacity: 1; }
+    input[type="range"] { width: 100%; }
   </style>
 </head>
 <body>
@@ -79,14 +27,14 @@
 
   <div id="editor" class="tab-content active">
     <input type="file" id="imgInput" accept="image/*"><br><br>
-    
+
     <label>Línea 1:</label>
     <input type="text" id="line1"><br>
     Tamaño: <input type="number" id="size1" value="24">
     Color: <input type="color" id="color1" value="#ffffff"><br>
     Posición vertical: <input type="range" id="top1" min="0" max="90">
     Posición horizontal: <input type="range" id="left1" min="0" max="90"><br><br>
-    
+
     <label>Línea 2:</label>
     <input type="text" id="line2"><br>
     Tamaño: <input type="number" id="size2" value="24">
@@ -108,26 +56,28 @@
   </div>
 
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBTq8TIMm1dMlNF2QsekfLRyt9PTF59ksE",
-    authDomain: "overlay-david.firebaseapp.com",
-    projectId: "overlay-david",
-    storageBucket: "overlay-david.firebasestorage.app",
-    messagingSenderId: "330518774873",
-    appId: "1:330518774873:web:7676cfffb5bc76a0789d48"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTq8TIMm1dMlNF2QsekfLRyt9PTF59ksE",
+      authDomain: "overlay-david.firebaseapp.com",
+      projectId: "overlay-david",
+      storageBucket: "overlay-david.firebasestorage.app",
+      messagingSenderId: "330518774873",
+      appId: "1:330518774873:web:7676cfffb5bc76a0789d48"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    const showTab = (id) => {
+    // Cambiar pestaña
+    window.showTab = (id) => {
       document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
       document.getElementById(id).classList.add("active");
     };
 
+    // Cargar imagen
     const previewImg = document.getElementById("previewImg");
     document.getElementById("imgInput").addEventListener("change", e => {
       const file = e.target.files[0];
@@ -138,16 +88,16 @@
       reader.readAsDataURL(file);
     });
 
-    function toggleOverlay() {
-      document.getElementById("text1").classList.toggle("hidden");
-      document.getElementById("text1").classList.toggle("visible");
-      document.getElementById("text2").classList.toggle("hidden");
-      document.getElementById("text2").classList.toggle("visible");
-      previewImg.classList.toggle("hidden");
-      previewImg.classList.toggle("visible");
-    }
+    // Alternar visibilidad
+    window.toggleOverlay = () => {
+      ["text1", "text2", "previewImg"].forEach(id => {
+        document.getElementById(id).classList.toggle("hidden");
+        document.getElementById(id).classList.toggle("visible");
+      });
+    };
 
-    function saveOverlay() {
+    // Guardar en Firebase
+    window.saveOverlay = () => {
       const data = {
         img: previewImg.src,
         line1: document.getElementById("line1").value,
@@ -168,9 +118,11 @@
           <p><strong>Link limpio:</strong></p>
           <a href="limpio.html?id=${key}" target="_blank">limpio.html?id=${key}</a>
         `;
+        showTab('preview');
       });
-    }
+    };
 
+    // Actualizar texto en vista previa en tiempo real
     setInterval(() => {
       const t1 = document.getElementById("text1");
       t1.textContent = document.getElementById("line1").value;
@@ -187,89 +139,5 @@
       t2.style.color = document.getElementById("color2").value;
     }, 300);
   </script>
-  <script>
-  function showTab(tabId) {
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-  }
-
-  function toggleOverlay(id) {
-    const overlay = document.getElementById(id);
-    overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none';
-  }
-
-  function updatePreview(id) {
-    const text = document.getElementById(`text${id}`).value;
-    const fontSize = document.getElementById(`fontSize${id}`).value;
-    const color = document.getElementById(`color${id}`).value;
-    const top = document.getElementById(`top${id}`).value + '%';
-    const left = document.getElementById(`left${id}`).value + '%';
-
-    const preview = document.getElementById(`preview${id}`);
-    preview.innerText = text;
-    preview.style.fontSize = fontSize + 'px';
-    preview.style.color = color;
-    preview.style.top = top;
-    preview.style.left = left;
-    preview.style.display = 'block';
-  }
-
-  function saveOverlay() {
-    const imageInput = document.getElementById('image');
-    const image = imageInput.files[0];
-    if (!image) return alert('Primero selecciona una imagen');
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const previewContainer = document.getElementById('previewContainer');
-      previewContainer.innerHTML = '';
-      const img = new Image();
-      img.src = e.target.result;
-      img.className = 'preview-img';
-      previewContainer.appendChild(img);
-
-      // Agrega las líneas de texto
-      for (let i = 1; i <= 2; i++) {
-        const text = document.getElementById(`text${i}`).value;
-        const fontSize = document.getElementById(`fontSize${i}`).value;
-        const color = document.getElementById(`color${i}`).value;
-        const top = document.getElementById(`top${i}`).value + '%';
-        const left = document.getElementById(`left${i}`).value + '%';
-
-        const textDiv = document.createElement('div');
-        textDiv.id = `preview${i}`;
-        textDiv.innerText = text;
-        textDiv.style.position = 'absolute';
-        textDiv.style.top = top;
-        textDiv.style.left = left;
-        textDiv.style.fontSize = fontSize + 'px';
-        textDiv.style.color = color;
-        textDiv.style.fontWeight = 'bold';
-        textDiv.style.textShadow = '1px 1px 3px black';
-
-        previewContainer.appendChild(textDiv);
-      }
-    };
-    reader.readAsDataURL(image);
-  }
-
-  function generateLink() {
-    const overlayData = {
-      text1: document.getElementById('text1').value,
-      fontSize1: document.getElementById('fontSize1').value,
-      color1: document.getElementById('color1').value,
-      top1: document.getElementById('top1').value,
-      left1: document.getElementById('left1').value,
-      text2: document.getElementById('text2').value,
-      fontSize2: document.getElementById('fontSize2').value,
-      color2: document.getElementById('color2').value,
-      top2: document.getElementById('top2').value,
-      left2: document.getElementById('left2').value
-    };
-    const queryString = new URLSearchParams(overlayData).toString();
-    const url = `${location.origin}${location.pathname.replace("index.html", "")}limpio.html?${queryString}`;
-    window.open(url, '_blank');
-  }
-</script>
 </body>
 </html>
