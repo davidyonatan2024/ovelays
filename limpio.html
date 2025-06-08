@@ -1,97 +1,80 @@
+<!-- limpio.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Overlay Limpio</title>
   <style>
-    body {
+    body, html {
       margin: 0;
+      padding: 0;
       background: transparent;
-      overflow: hidden;
     }
-
-    .overlay-box {
+    .overlay-container {
       position: relative;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
     }
-
-    img {
+    .overlay-img {
       width: 100%;
       height: auto;
-      display: block;
-      transition: all 0.8s ease-in-out;
-      transform: translateX(-100%);
-      opacity: 0;
     }
-
-    img.show {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    .texto {
+    .overlay-text {
       position: absolute;
-      font-weight: bold;
-      text-shadow: 2px 2px 5px black;
       white-space: nowrap;
-      transition: all 0.8s ease-in-out;
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-
-    .texto.show {
-      transform: translateX(0);
-      opacity: 1;
+      transition: transform 0.6s ease;
+      color: white;
     }
   </style>
 </head>
 <body>
+  <div class="overlay-container">
+    <img id="img" class="overlay-img" />
+    <div id="line1" class="overlay-text"></div>
+    <div id="line2" class="overlay-text"></div>
+  </div>
 
-<div class="overlay-box">
-  <img id="img" class="show" src="">
-  <div id="text1" class="texto show"></div>
-  <div id="text2" class="texto show"></div>
-</div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-<script>
-  function getParam(name) {
-    const url = new URLSearchParams(window.location.search);
-    return url.get(name) || "";
-  }
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTq8TIMm1dMlNF2QsekfLRyt9PTF59ksE",
+      authDomain: "overlay-david.firebaseapp.com",
+      projectId: "overlay-david",
+      storageBucket: "overlay-david.appspot.com",
+      messagingSenderId: "330518774873",
+      appId: "1:330518774873:web:7676cfffb5bc76a0789d48",
+      databaseURL: "https://overlay-david-default-rtdb.firebaseio.com/"
+    };
 
-  const img = document.getElementById('img');
-  const text1 = document.getElementById('text1');
-  const text2 = document.getElementById('text2');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  // Imagen
-  const imgSrc = getParam('img');
-  if (imgSrc) {
-    img.src = imgSrc;
-  }
+    const id = new URLSearchParams(location.search).get("id");
+    if (id) {
+      get(child(ref(db), "overlays/" + id)).then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          document.getElementById("img").src = data.img;
 
-  // Línea 1
-  text1.textContent = getParam('t1');
-  text1.style.color = getParam('c1');
-  text1.style.fontSize = getParam('s1') + 'px';
-  text1.style.top = getParam('y1') + 'px';
-  text1.style.left = getParam('x1') + 'px';
+          const l1 = document.getElementById("line1");
+          l1.textContent = data.line1;
+          l1.style.top = data.top1 + "%";
+          l1.style.left = data.left1 + "%";
+          l1.style.fontSize = data.size1 + "px";
+          l1.style.color = data.color1;
 
-  // Línea 2
-  text2.textContent = getParam('t2');
-  text2.style.color = getParam('c2');
-  text2.style.fontSize = getParam('s2') + 'px';
-  text2.style.top = getParam('y2') + 'px';
-  text2.style.left = getParam('x2') + 'px';
-
-  // Forzar animación con delay
-  setTimeout(() => {
-    img.classList.add('show');
-    text1.classList.add('show');
-    text2.classList.add('show');
-  }, 300);
-</script>
-
+          const l2 = document.getElementById("line2");
+          l2.textContent = data.line2;
+          l2.style.top = data.top2 + "%";
+          l2.style.left = data.left2 + "%";
+          l2.style.fontSize = data.size2 + "px";
+          l2.style.color = data.color2;
+        }
+      });
+    }
+  </script>
 </body>
 </html>
