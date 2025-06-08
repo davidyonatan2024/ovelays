@@ -1,192 +1,192 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Editor Overlay</title>
+  <title>Editor de Overlays</title>
   <style>
-    body { margin: 0; font-family: sans-serif; background: #111; color: white; }
-    .tabs { display: flex; }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
     .tab-btn {
-      flex: 1;
-      padding: 10px;
-      text-align: center;
-      background: #222;
+      padding: 10px 20px;
       cursor: pointer;
-      border-bottom: 2px solid transparent;
+      background-color: #eee;
+      border: none;
+      margin: 0 5px;
     }
-    .tab-btn.active { border-bottom: 2px solid #00f; background: #333; }
-    .tab-content { display: none; padding: 15px; }
-    .tab-content.active { display: block; }
 
-    input, select, button {
-      margin-bottom: 10px;
+    .tab-content {
+      display: none;
+      padding: 20px;
+    }
+
+    .tab-content.active {
       display: block;
-      width: 100%;
     }
 
-    .overlay-box {
+    .overlay-container {
       position: relative;
-      max-width: 800px;
-      margin: auto;
+      max-width: 100%;
       overflow: hidden;
     }
 
-    .overlay-box img {
+    .overlay-img {
       width: 100%;
+      height: auto;
       display: block;
-      transition: all 0.8s ease-in-out;
-      transform: translateX(-100%);
-      opacity: 0;
     }
 
-    .overlay-box img.show {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    .texto {
+    .overlay-text {
       position: absolute;
-      font-weight: bold;
-      text-shadow: 2px 2px 5px black;
-      transform: translateX(-100%);
-      opacity: 0;
-      transition: all 0.8s ease-in-out;
+      left: 0;
+      color: white;
       white-space: nowrap;
+      transition: transform 0.6s ease;
     }
 
-    .texto.show {
-      transform: translateX(0);
+    .hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+
+    .visible {
+      transform: translateX(0%);
       opacity: 1;
     }
 
-    #link-output {
-      margin-top: 10px;
-      background: #222;
-      color: #0f0;
-      padding: 8px;
-      word-break: break-all;
+    input[type="range"] {
+      width: 100%;
     }
   </style>
 </head>
 <body>
 
   <div class="tabs">
-    <div class="tab-btn active" onclick="mostrarPestana('editor', this)">Editor</div>
-    <div class="tab-btn" onclick="mostrarPestana('preview', this)">Vista Previa</div>
+    <button class="tab-btn" onclick="showTab('editor')">Editor</button>
+    <button class="tab-btn" onclick="showTab('preview')">Vista previa</button>
   </div>
 
   <div id="editor" class="tab-content active">
-    <h2>Editor</h2>
-    <input type="file" accept="image/*" onchange="cargarImagen(this)">
+    <input type="file" id="imgInput" accept="image/*"><br><br>
     
-    <label>Texto Línea 1</label>
-    <input type="text" id="text1" oninput="actualizarPreview()">
-    <label>Color</label>
-    <input type="color" id="color1" value="#ffffff" oninput="actualizarPreview()">
-    <label>Tamaño</label>
-    <input type="number" id="size1" value="32" oninput="actualizarPreview()">
-    <label>Posición vertical</label>
-    <input type="range" id="top1" min="0" max="500" value="20" oninput="actualizarPreview()">
-    <label>Posición horizontal</label>
-    <input type="range" id="left1" min="0" max="800" value="0" oninput="actualizarPreview()">
+    <label>Línea 1:</label>
+    <input type="text" id="line1"><br>
+    Tamaño: <input type="number" id="size1" value="24">
+    Color: <input type="color" id="color1" value="#ffffff"><br>
+    Posición vertical: <input type="range" id="top1" min="0" max="90">
+    Posición horizontal: <input type="range" id="left1" min="0" max="90"><br><br>
+    
+    <label>Línea 2:</label>
+    <input type="text" id="line2"><br>
+    Tamaño: <input type="number" id="size2" value="24">
+    Color: <input type="color" id="color2" value="#ffffff"><br>
+    Posición vertical: <input type="range" id="top2" min="0" max="90">
+    Posición horizontal: <input type="range" id="left2" min="0" max="90"><br><br>
 
-    <label>Texto Línea 2</label>
-    <input type="text" id="text2" oninput="actualizarPreview()">
-    <label>Color</label>
-    <input type="color" id="color2" value="#ffffff" oninput="actualizarPreview()">
-    <label>Tamaño</label>
-    <input type="number" id="size2" value="28" oninput="actualizarPreview()">
-    <label>Posición vertical</label>
-    <input type="range" id="top2" min="0" max="500" value="70" oninput="actualizarPreview()">
-    <label>Posición horizontal</label>
-    <input type="range" id="left2" min="0" max="800" value="0" oninput="actualizarPreview()">
-
-    <button onclick="toggleOverlay()">Mostrar / Ocultar Overlay</button>
-    <button onclick="generarLink()">Generar Link Limpio</button>
-    <div id="link-output"></div>
+    <button onclick="toggleOverlay()">Mostrar/Ocultar</button>
+    <button onclick="saveOverlay()">Generar Link</button>
+    <div id="linkResult"></div>
   </div>
 
   <div id="preview" class="tab-content">
-    <div class="overlay-box">
-      <img id="preview-img" src="">
-      <div id="preview-text1" class="texto"></div>
-      <div id="preview-text2" class="texto"></div>
+    <div class="overlay-container" id="previewContainer">
+      <img id="previewImg" class="overlay-img" />
+      <div id="text1" class="overlay-text visible"></div>
+      <div id="text2" class="overlay-text visible"></div>
     </div>
   </div>
 
-  <script>
-    let imagenData = "";
-    let visible = false;
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    function mostrarPestana(id, btn) {
-      document.querySelectorAll('.tab-content').forEach(div => div.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      btn.classList.add('active');
-    }
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTq8TIMm1dMlNF2QsekfLRyt9PTF59ksE",
+      authDomain: "overlay-david.firebaseapp.com",
+      projectId: "overlay-david",
+      storageBucket: "overlay-david.appspot.com",
+      messagingSenderId: "330518774873",
+      appId: "1:330518774873:web:7676cfffb5bc76a0789d48",
+      databaseURL: "https://overlay-david-default-rtdb.firebaseio.com/"
+    };
 
-    function cargarImagen(input) {
-      const file = input.files[0];
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const showTab = (id) => {
+      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    };
+
+    const previewImg = document.getElementById("previewImg");
+    document.getElementById("imgInput").addEventListener("change", e => {
+      const file = e.target.files[0];
       const reader = new FileReader();
-      reader.onload = e => {
-        imagenData = e.target.result;
-        document.getElementById('preview-img').src = imagenData;
+      reader.onload = function(ev) {
+        previewImg.src = ev.target.result;
       };
-      if (file) reader.readAsDataURL(file);
-    }
-
-    function actualizarPreview() {
-      const t1 = document.getElementById('preview-text1');
-      t1.textContent = document.getElementById('text1').value;
-      t1.style.color = document.getElementById('color1').value;
-      t1.style.fontSize = document.getElementById('size1').value + 'px';
-      t1.style.top = document.getElementById('top1').value + 'px';
-      t1.style.left = document.getElementById('left1').value + 'px';
-
-      const t2 = document.getElementById('preview-text2');
-      t2.textContent = document.getElementById('text2').value;
-      t2.style.color = document.getElementById('color2').value;
-      t2.style.fontSize = document.getElementById('size2').value + 'px';
-      t2.style.top = document.getElementById('top2').value + 'px';
-      t2.style.left = document.getElementById('left2').value + 'px';
-    }
+      reader.readAsDataURL(file);
+    });
 
     function toggleOverlay() {
-      const t1 = document.getElementById('preview-text1');
-      const t2 = document.getElementById('preview-text2');
-      const img = document.getElementById('preview-img');
-      visible = !visible;
-
-      if (visible) {
-        t1.classList.add('show');
-        t2.classList.add('show');
-        img.classList.add('show');
-      } else {
-        t1.classList.remove('show');
-        t2.classList.remove('show');
-        img.classList.remove('show');
-      }
+      document.getElementById("text1").classList.toggle("hidden");
+      document.getElementById("text1").classList.toggle("visible");
+      document.getElementById("text2").classList.toggle("hidden");
+      document.getElementById("text2").classList.toggle("visible");
+      previewImg.classList.toggle("hidden");
+      previewImg.classList.toggle("visible");
     }
 
-    function generarLink() {
-      const params = new URLSearchParams();
-      params.set("img", imagenData);
-      params.set("t1", document.getElementById('text1').value);
-      params.set("c1", document.getElementById('color1').value);
-      params.set("s1", document.getElementById('size1').value);
-      params.set("y1", document.getElementById('top1').value);
-      params.set("x1", document.getElementById('left1').value);
-      params.set("t2", document.getElementById('text2').value);
-      params.set("c2", document.getElementById('color2').value);
-      params.set("s2", document.getElementById('size2').value);
-      params.set("y2", document.getElementById('top2').value);
-      params.set("x2", document.getElementById('left2').value);
+    function saveOverlay() {
+      const data = {
+        img: previewImg.src,
+        line1: document.getElementById("line1").value,
+        size1: document.getElementById("size1").value,
+        color1: document.getElementById("color1").value,
+        top1: document.getElementById("top1").value,
+        left1: document.getElementById("left1").value,
+        line2: document.getElementById("line2").value,
+        size2: document.getElementById("size2").value,
+        color2: document.getElementById("color2").value,
+        top2: document.getElementById("top2").value,
+        left2: document.getElementById("left2").value
+      };
 
-      const base = window.location.href.split("?")[0].replace("overlays.html", "limpio.html");
-      const link = base + "?" + params.toString();
-      document.getElementById("link-output").textContent = link;
+      const key = push(ref(db, "overlays")).key;
+      set(ref(db, "overlays/" + key), data).then(() => {
+        document.getElementById("linkResult").innerHTML = `
+          <p><strong>Link limpio:</strong></p>
+          <a href="limpio.html?id=${key}" target="_blank">limpio.html?id=${key}</a>
+        `;
+      });
     }
+
+    setInterval(() => {
+      const t1 = document.getElementById("text1");
+      t1.textContent = document.getElementById("line1").value;
+      t1.style.top = document.getElementById("top1").value + "%";
+      t1.style.left = document.getElementById("left1").value + "%";
+      t1.style.fontSize = document.getElementById("size1").value + "px";
+      t1.style.color = document.getElementById("color1").value;
+
+      const t2 = document.getElementById("text2");
+      t2.textContent = document.getElementById("line2").value;
+      t2.style.top = document.getElementById("top2").value + "%";
+      t2.style.left = document.getElementById("left2").value + "%";
+      t2.style.fontSize = document.getElementById("size2").value + "px";
+      t2.style.color = document.getElementById("color2").value;
+    }, 300);
   </script>
 </body>
 </html>
