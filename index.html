@@ -108,21 +108,20 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBTq8TIMm1dMlNF2QsekfLRyt9PTF59ksE",
-      authDomain: "overlay-david.firebaseapp.com",
-      projectId: "overlay-david",
-      storageBucket: "overlay-david.appspot.com",
-      messagingSenderId: "330518774873",
-      appId: "1:330518774873:web:7676cfffb5bc76a0789d48",
-      databaseURL: "https://overlay-david-default-rtdb.firebaseio.com/"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyBTq8TIMm1dMlNF2QsekfLRyt9PTF59ksE",
+    authDomain: "overlay-david.firebaseapp.com",
+    projectId: "overlay-david",
+    storageBucket: "overlay-david.firebasestorage.app",
+    messagingSenderId: "330518774873",
+    appId: "1:330518774873:web:7676cfffb5bc76a0789d48"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
 
     const showTab = (id) => {
       document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
