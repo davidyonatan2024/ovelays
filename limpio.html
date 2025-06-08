@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Overlay Limpio</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .overlay-box {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: all 0.8s ease-in-out;
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+
+    img.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .texto {
+      position: absolute;
+      font-weight: bold;
+      text-shadow: 2px 2px 5px black;
+      white-space: nowrap;
+      transition: all 0.8s ease-in-out;
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+
+    .texto.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay-box">
+  <img id="img" class="show" src="">
+  <div id="text1" class="texto show"></div>
+  <div id="text2" class="texto show"></div>
+</div>
+
+<script>
+  function getParam(name) {
+    const url = new URLSearchParams(window.location.search);
+    return url.get(name) || "";
+  }
+
+  const img = document.getElementById('img');
+  const text1 = document.getElementById('text1');
+  const text2 = document.getElementById('text2');
+
+  // Imagen
+  const imgSrc = getParam('img');
+  if (imgSrc) {
+    img.src = imgSrc;
+  }
+
+  // Línea 1
+  text1.textContent = getParam('t1');
+  text1.style.color = getParam('c1');
+  text1.style.fontSize = getParam('s1') + 'px';
+  text1.style.top = getParam('y1') + 'px';
+  text1.style.left = getParam('x1') + 'px';
+
+  // Línea 2
+  text2.textContent = getParam('t2');
+  text2.style.color = getParam('c2');
+  text2.style.fontSize = getParam('s2') + 'px';
+  text2.style.top = getParam('y2') + 'px';
+  text2.style.left = getParam('x2') + 'px';
+
+  // Forzar animación con delay
+  setTimeout(() => {
+    img.classList.add('show');
+    text1.classList.add('show');
+    text2.classList.add('show');
+  }, 300);
+</script>
+
+</body>
+</html>
