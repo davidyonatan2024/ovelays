@@ -187,5 +187,89 @@
       t2.style.color = document.getElementById("color2").value;
     }, 300);
   </script>
+  <script>
+  function showTab(tabId) {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+  }
+
+  function toggleOverlay(id) {
+    const overlay = document.getElementById(id);
+    overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function updatePreview(id) {
+    const text = document.getElementById(`text${id}`).value;
+    const fontSize = document.getElementById(`fontSize${id}`).value;
+    const color = document.getElementById(`color${id}`).value;
+    const top = document.getElementById(`top${id}`).value + '%';
+    const left = document.getElementById(`left${id}`).value + '%';
+
+    const preview = document.getElementById(`preview${id}`);
+    preview.innerText = text;
+    preview.style.fontSize = fontSize + 'px';
+    preview.style.color = color;
+    preview.style.top = top;
+    preview.style.left = left;
+    preview.style.display = 'block';
+  }
+
+  function saveOverlay() {
+    const imageInput = document.getElementById('image');
+    const image = imageInput.files[0];
+    if (!image) return alert('Primero selecciona una imagen');
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const previewContainer = document.getElementById('previewContainer');
+      previewContainer.innerHTML = '';
+      const img = new Image();
+      img.src = e.target.result;
+      img.className = 'preview-img';
+      previewContainer.appendChild(img);
+
+      // Agrega las líneas de texto
+      for (let i = 1; i <= 2; i++) {
+        const text = document.getElementById(`text${i}`).value;
+        const fontSize = document.getElementById(`fontSize${i}`).value;
+        const color = document.getElementById(`color${i}`).value;
+        const top = document.getElementById(`top${i}`).value + '%';
+        const left = document.getElementById(`left${i}`).value + '%';
+
+        const textDiv = document.createElement('div');
+        textDiv.id = `preview${i}`;
+        textDiv.innerText = text;
+        textDiv.style.position = 'absolute';
+        textDiv.style.top = top;
+        textDiv.style.left = left;
+        textDiv.style.fontSize = fontSize + 'px';
+        textDiv.style.color = color;
+        textDiv.style.fontWeight = 'bold';
+        textDiv.style.textShadow = '1px 1px 3px black';
+
+        previewContainer.appendChild(textDiv);
+      }
+    };
+    reader.readAsDataURL(image);
+  }
+
+  function generateLink() {
+    const overlayData = {
+      text1: document.getElementById('text1').value,
+      fontSize1: document.getElementById('fontSize1').value,
+      color1: document.getElementById('color1').value,
+      top1: document.getElementById('top1').value,
+      left1: document.getElementById('left1').value,
+      text2: document.getElementById('text2').value,
+      fontSize2: document.getElementById('fontSize2').value,
+      color2: document.getElementById('color2').value,
+      top2: document.getElementById('top2').value,
+      left2: document.getElementById('left2').value
+    };
+    const queryString = new URLSearchParams(overlayData).toString();
+    const url = `${location.origin}${location.pathname.replace("index.html", "")}limpio.html?${queryString}`;
+    window.open(url, '_blank');
+  }
+</script>
 </body>
 </html>
